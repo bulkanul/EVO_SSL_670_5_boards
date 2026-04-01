@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>EVO_SSL_670_5_boards</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<triggers>clean,full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
+			<triggers>full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.st.stm32cube.ide.mcu.MCUProjectNature</nature>
+		<nature>com.st.stm32cube.ide.mcu.MCUCubeProjectNature</nature>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>com.st.stm32cube.ide.mcu.MCUCubeIdeServicesRevAev2ProjectNature</nature>
+		<nature>com.st.stm32cube.ide.mcu.MCUAdvancedStructureProjectNature</nature>
+		<nature>com.st.stm32cube.ide.mcu.MCUSingleCpuProjectNature</nature>
+		<nature>com.st.stm32cube.ide.mcu.MCURootProjectNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>Core/Src/drivers/HPLD_1000.c</name>
+			<type>1</type>
+			<locationURI>$%7BPROJECT_LOC%7D/board_prj_driver_lib/drivers/HPLD_1000.c</locationURI>
+		</link>
+		<link>
+			<name>Core/Src/drivers/TEC_Driver_3_drv.c</name>
+			<type>1</type>
+			<locationURI>$%7BPROJECT_LOC%7D/board_prj_driver_lib/drivers/TEC_Driver_3_drv.c</locationURI>
+		</link>
+	</linkedResources>
+</projectDescription>

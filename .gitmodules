@@ -1,0 +1,3 @@
+[submodule "board_prj_driver_lib"]
+	path = board_prj_driver_lib
+	url = https://github.com/bulkanul/board_prj_driver_lib.git
