@@ -35,8 +35,6 @@
 #include "../Inc/commands_handler.h"
 #include "../Inc/hardware.h"
 
-#include "../Inc/drivers/amp.h"
-#include "../Inc/drivers/preamp.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,9 +57,13 @@
 device_struct mcs_storage;
 
 uint8_t uart1_rx_byte;
-const uint8_t seed_gen_id[SEED_GEN_COUNT] = {9};
-const uint8_t preamp_id[PREAMP_COUNT] = {10,11,12,13};
-const uint8_t amp_id[AMP_COUNT] = {20,21,22,23};
+
+#if HPLD_1000_COUNT > 0
+	uint8_t hpld_1000_can_id[HPLD_1000_COUNT] = {1};
+#endif
+#if TEC3_COUNT > 0
+	uint8_t tec3_can_id[TEC3_COUNT] = {2,3,4,5};
+#endif
 
 /* Definitions for dev_refresh_task */
 int dev_refresh_task_state = 0;
@@ -209,26 +211,27 @@ void h_main_task(void const * argument)
 
 	leds_init (&mcs->leds);
 
-	can_configure_filters(&hcan1, EXT_DEVICE_ADDR) ;
+	can_configure_filters(&hcan1, MCS_CAN_ID);
 	can_start_module(&hcan1);
 	osDelay(3000);
-	#if SEED_GEN_COUNT > 0
-		for(int i = 0; i < SEED_GEN_COUNT;i++)
-			gen_init(&mcs->gen, &hcan1, seed_gen_id[i], &int_can_mess_queue,CanMutexHandle);
-	#endif
-	#if PREAMP_COUNT > 0
-		for(int i = 0; i < PREAMP_COUNT;i++)
-			preamp_init(&mcs->preamp[i], &hcan1,preamp_id[i], &int_can_mess_queue, CanMutexHandle);
-	#endif
-	#if AMP_COUNT > 0
-		for(int i = 0; i < AMP_COUNT;i++)
-			amp_init(&mcs->amp[i], &hcan1,amp_id[i], &int_can_mess_queue,CanMutexHandle);
-	#endif
-	#if DIVIDE_COUNT > 0
-		for(int i = 0; i < DIVIDE_COUNT;i++){
-		  divide_init(&mcs->div[i], &hcan1, 8, &int_can_mess_queue, CanMutexHandle);
+
+#if HPLD_1000_COUNT > 0
+	for(uint16_t i = 0; i < HPLD_1000_COUNT;i++)
+		hpld_1000_init(&mcs->hpld_1000[i],&hcan1,hpld_1000_can_id[i],&int_can_mess_queue,CanMutexHandle);
+#endif
+
+#if TEC3_COUNT > 0
+	for(int i = 0; i < TEC3_COUNT; i ++)
+	{
+		tec3_controller_struct *dev = &mcs->tec3[i];
+		tec3_init(dev, &hcan1, tec3_can_id[i], &int_can_mess_queue, CanMutexHandle);
+		if(mcs->config.tec_temp[i] > 10 && mcs->config.tec_temp[i] < 100)
+		{
+			tec3_set_temperature_0(dev, mcs->config.tec_temp[i]);
+			tec3_set_start_stop(dev, mcs->config.tec_onoff[i]);
 		}
-	#endif
+	}
+#endif
 
 	HAL_GPIO_WritePin(Protection_ON_OFF_GPIO_Port, Protection_ON_OFF_Pin, GPIO_PIN_RESET);
 
@@ -372,9 +375,6 @@ void h_tools(void const * argument)
 			user_mode_prepare ();
 			create_usr_offtaskHandle ();
 		}
-
-		preamp_all_power_update (mcs);
-		amp_all_power_update (mcs);
 	}
   /* USER CODE END h_tools */
 }
@@ -389,28 +389,11 @@ void dev_refresh_task_h(const void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
-#if SEED_GEN_COUNT > 0
-		refresh_gen_state(&mcs->gen);
-#endif
-
-#if PREAMP_COUNT > 0
-		for(int i = 0; i < PREAMP_COUNT; i++){
-			preamp_refresh_state(&mcs->preamp[i]);
-		}
-#endif
-
-#if AMP_COUNT > 0
-		for(int i = 0; i < AMP_COUNT;i++){
-			amp_refresh_state(&mcs->amp[i]);
-		}
-#endif
-
-#if DIVIDE_COUNT > 0
-		for(int i = 0; i < DIVIDE_COUNT;i++){
-			refresh_divide_state(&mcs->div[i]);
-		}
-#endif
-		osDelay(1);
+		for(int i = 0; i < HPLD_1000_COUNT; i ++)
+			refresh_hpld_1000_state(&mcs->hpld_1000[i]);
+		for(int i = 0; i < TEC3_COUNT; i ++)
+			refresh_tec3_state(&mcs->tec3[i]);
+		osDelay(10);
 	}
 	dev_refresh_task_state = 0;
 }

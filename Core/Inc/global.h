@@ -75,7 +75,13 @@ typedef struct {
 	int term_resi;
 	int term_beta;
 	float v_ref;
-} config_struct;
+
+	float tec_temp                    [TEC3_COUNT];
+	float tec_onoff                   [TEC3_COUNT];
+
+	float hpld1000_curr               [HPLD_1000_COUNT];
+}
+config_struct;
 
 typedef struct
 {

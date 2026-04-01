@@ -31,6 +31,13 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#ifndef FDCAN
+  #include "can.h"
+  #define CAN_TYPE CAN_HandleTypeDef
+#else
+  #include "fdcan.h"
+  #define CAN_TYPE FDCAN_HandleTypeDef
+#endif
 
 /* USER CODE END Includes */
 

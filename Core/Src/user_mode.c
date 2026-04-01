@@ -33,15 +33,61 @@ osThreadDef(usr_offtask, h_usr_offtask, osPriorityNormal, 1, 256);
 
 void h_usr_ontask(const void *argument )
 {
-	set_usr_ontask_state (false);
-	osThreadTerminate (NULL);
+	device_struct *mcs = &mcs_storage;
+	uint8_t err = 0;
+
+#if HPLD_1000_COUNT > 0
+	if(err == 0)
+	{
+		protection_err_clr(mcs);
+		if(mcs->hpld_1000[0].state.flags != 0)
+			err++;
+	}
+
+#if HPLD_1000_COUNT > 0
+	if(err == 0)
+	{
+		int tmp_hpld_1000_mode = 0;
+		err = hpld_1000_set_state_and_check(&mcs->hpld_1000[0],
+				1, // onoff
+				tmp_hpld_1000_mode, // mode
+				mcs->config.hpld1000_curr[0]);
+	}
+#endif
+
+//  FIXME
+//	set_pocels_state(mcs, 1); // turn on pocels cell
+//	set_pocels_voltage(mcs, mcs->config.hv_set_value);
+
+	if (err == 0)
+		while (get_usr_ontask_terminator() == false && mcs->hpld_1000[0].state.flags == 0 && err == 0)
+		{
+			err += get_error(mcs);
+			get_emission(mcs); // is for update output power value
+			osDelay(100);
+		}
+#endif
+
+//  FIXME
+//	set_pocels_state(mcs, 0); // turn on pocels cell
+
+#if HPLD_1000_COUNT > 0
+	for(uint16_t i = 0; i < HPLD_1000_COUNT; i++)
+		hpld_1000_set_state_off(&mcs->hpld_1000[i]);
+#endif
+
+	set_usr_ontask_state(false);
+  	osThreadTerminate(NULL);
 }
 
 void h_usr_offtask(const void *argument)
 {
-	device_struct * mcs = &mcs_storage;
-	full_off_devices(mcs);
-	clear_status_device(mcs);
+	device_struct *mcs = &mcs_storage ;
+//	set_pocels_state(mcs, 0); // turn on pocels cell
+#if HPLD_1000_COUNT > 0
+	for(uint16_t i = 0; i < HPLD_1000_COUNT; i++)
+		hpld_1000_set_state_off(&mcs->hpld_1000[i]);
+#endif
 
 	set_usr_offtask_state(false);
 	osThreadTerminate(NULL);

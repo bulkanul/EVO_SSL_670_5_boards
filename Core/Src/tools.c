@@ -195,11 +195,6 @@ int save_last_config_data(config_struct* source_struct, int conf_struct_size)
 	return 0;
 }
 
-void protection_reset(void)
-{
-//FIXME
-}
-
 float abs_f(float c)
 {
 	return (c >= 0)? c : c*(-1);
@@ -289,6 +284,23 @@ void indication_handler(QueueHandle_t* indication_queue,device_struct* mcs)
 	}
 }
 
+int get_error(device_struct* mcs){
+	alarms_t* alarm = &mcs->alarms;
+	int err = 0;
+	err += alarm->val;
+	for(int i = 0; i < TEC3_COUNT; i ++)
+	{
+		if(mcs->config.tec_onoff[i] == 1)
+			err += (mcs->tec3[i].state.started != 1);
+	}
+	for(int i = 0; i < TEC3_COUNT; i ++)
+	{
+		if(mcs->config.tec_onoff[i] == 1)
+			err += (mcs->tec3[i].available != 1);
+	}
+	return err != 0;
+}
+
 void alarm_and_state_handler (device_struct *mcs)
 {
 	mcs->alarms.bits.emergency |= 		mcs->state.bits.emergency = 	is_alarm_emergency();
@@ -299,71 +311,54 @@ void alarm_and_state_handler (device_struct *mcs)
 	mcs->alarms.bits.stop |= 			mcs->state.bits.stop = 			is_alarm_stop();
 }
 
-int get_emission(device_struct* mcs)
-{
-	int light = 0;
-
-		for(int i = 0; i < AMP_COUNT;i++){
-			if(mcs->amp[i].state.started_state == 1 || mcs->amp[i].state.start_pilot == 1){
-				light++;
-			}
-		}
-		for(int i = 0; i < PREAMP_COUNT;i++){
-			if(mcs->preamp[i].state.started_state == 1)
-				light++;
-		}
-		if(mcs->gen.state.started_state == 1)
-			light++;
-
-	return light != 0;
+int get_emission(device_struct* mcs){
+	uint8_t emission = 0;
+#if HPLD_1000_COUNT > 0
+	for(uint16_t i = 0; i  < HPLD_1000_COUNT; i++)
+		emission += mcs->hpld_1000[i].available & mcs->hpld_1000[i].state.started_state;
+#endif
+	return emission != 0;
 }
 
+void form_cm_header(can_message_struct *cm, int id){
+#ifdef FDCAN
+	cm->tx_header.Identifier = id;
+	cm->tx_header.IdType = FDCAN_STANDARD_ID;
+	cm->tx_header.TxFrameType = FDCAN_DATA_FRAME;
+	cm->tx_header.DataLength = FDCAN_DLC_BYTES_8;
+	cm->tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+	cm->tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+	cm->tx_header.FDFormat = FDCAN_CLASSIC_CAN;
+	cm->tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+	cm->tx_header.MessageMarker = 0;
+#else
+	cm->tx_header.StdId = id;
+	cm->tx_header.DLC = 8;
+	cm->tx_header.RTR = CAN_RTR_DATA;
+	cm->tx_header.IDE = CAN_ID_STD;
+	cm->tx_header.TransmitGlobalTime = DISABLE;
+#endif
+}
 
-void full_off_devices(device_struct* mcs)
+int protection_err_clr(device_struct *mcs)
 {
 	int err = 0;
-	int time = osKernelSysTick();
-	while(osKernelSysTick() - time < 10000){
-		for(int i = 0;i < AMP_COUNT;i++){
-			amp_set_onoff(&mcs->amp[i], 0);
-			amp_set_pilot_onoff(&mcs->amp[i], 0);
-			amp_get_onoff(&mcs->amp[i]);
-			amp_get_pilot_onoff(&mcs->amp[i]);
-			if(mcs->amp[i].state.start_pilot == 1)
-				err++;
-			if(mcs->preamp[i].state.started_state == 1)
-				err++;
-		}
-			if(err == 0)
-				break;
-	}
-	time = osKernelSysTick();
-	while(osKernelSysTick() - time < 10000){
-			for(int i = 0;i < PREAMP_COUNT;i++){
-				preamp_set_onoff(&mcs->preamp[i], 0);
-				if(mcs->preamp[i].state.started_state == 1)
-					err++;
+	mcs->alarms.val        = IDLE_STATE;
+	for(int i = 0 ; i < HPLD_1000_COUNT; i ++)
+	{
+		hpld_1000_struct *dev = &mcs->hpld_1000[i];
+		if (dev->available == 1)
+		{
+			int reps = 5;
+			while (reps-- > 0 && dev->state.flags != 0)
+			{
+				err += hpld_1000_rst_protection(dev);
+				hpld_1000_get_flags(dev);
+				osDelay(1);
 			}
-				if(err == 0)
-					break;
 		}
-	time = osKernelSysTick();
-	while(osKernelSysTick() - time < 10000) {
-		gen_set_onoff(&mcs->gen, 0);
 	}
-
-	power_off(mcs);
-}
-
-void clear_status_device(device_struct* mcs){
-	for(int i = 0; i < AMP_COUNT; i++){
-		mcs->amp[i].state.started_state = 0;
-		mcs->amp[i].state.start_pilot = 0;
-	}
-	for(int i = 0; i < PREAMP_COUNT;i++){
-		mcs->preamp[i].state.started_state = 0;
-	}
-	mcs->gen.state.started_state = 0;
+	return err;
 }
 
 void user_mode_prepare(void)

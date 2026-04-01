@@ -5,10 +5,8 @@
 
 #include <stdint.h>
 
-extern void gen_command(device_struct *mcs,char* resp,char* debug_buffer,char* tcp_buffer,int i);
-extern void preamp_command(device_struct *mcs,char* resp,char* debug_buffer,char* tcp_buffer,int i);
-extern void amp_command(device_struct *mcs,char* resp,char* debug_buffer,char* tcp_buffer,int i);
-extern void divide_command(device_struct* mcs, char* resp, char* debug_buffer, char* tcp_buffer, int i);
+extern void hpld_1000_command(device_struct *mcs,char* resp,char* debug_buffer,char* tcp_buffer,int i);
+extern void tec3_command(device_struct *mcs,char* resp,char* debug_buffer,char* tcp_buffer,int i);
 
 static void common_command(device_struct *mcs, char *resp, char *debug_buffer, char *tcp_buffer, int i);
 
@@ -16,13 +14,8 @@ void CommandsHandler(device_struct *mcs,char* resp,char* debug_buffer,char* tcp_
 	common_command(mcs, resp, debug_buffer, tcp_buffer, i);
 	user_command(mcs,resp,debug_buffer,tcp_buffer,i);
 
-	gen_command(mcs,resp,debug_buffer,tcp_buffer,i);
-	preamp_command(mcs,resp,debug_buffer,tcp_buffer,i);
-	amp_command(mcs,resp,debug_buffer,tcp_buffer,i);
-
-#if DIVIDE_COUNT > 0
-	divide_command(mcs,resp,debug_buffer,tcp_buffer,i);
-#endif
+	hpld_1000_command(mcs,resp,debug_buffer,tcp_buffer,i);
+	tec3_command(mcs,resp,debug_buffer,tcp_buffer,i);
 
 	if(resp[0] == 'l')
 		send_response(mcs->current_interface, resp);
