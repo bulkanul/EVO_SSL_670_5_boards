@@ -56,7 +56,7 @@
 /* USER CODE BEGIN Variables */
 device_struct mcs_storage;
 
-uint8_t uart1_rx_byte;
+uint8_t uart2_rx_byte;
 
 #if HPLD_1000_COUNT > 0
 	uint8_t hpld_1000_can_id[HPLD_1000_COUNT] = {1};
@@ -233,11 +233,6 @@ void h_main_task(void const * argument)
 	}
 #endif
 
-	HAL_GPIO_WritePin(Protection_ON_OFF_GPIO_Port, Protection_ON_OFF_Pin, GPIO_PIN_RESET);
-
-	if (!is_alarm_phase())
-		power_on(mcs);
-
 	osThreadResume(server_taskHandle);
 	osThreadResume(indi_taskHandle);
 	osThreadResume(can_sendHandle);
@@ -248,7 +243,7 @@ void h_main_task(void const * argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		HAL_UART_Receive_IT ( &huart1 , &uart1_rx_byte , 1 ) ;
+		HAL_UART_Receive_IT ( &huart2 , &uart2_rx_byte , 1 ) ;
 		if (xQueueReceive(tcp_rx_data_queue, &tcp_buffer[tcp_buffer_ind], 0) == pdPASS) {
 			if (tcp_buffer[tcp_buffer_ind] == '\r' || tcp_buffer[tcp_buffer_ind] == '\n')
 			{
@@ -401,15 +396,15 @@ void dev_refresh_task_h(const void *argument)
 void HAL_UART_RxCpltCallback ( UART_HandleTypeDef *huart )
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE ;
-	if ( huart == &huart1 ){
-		if ( xQueueSendFromISR ( tcp_rx_data_queue , ( &uart1_rx_byte ) ,
+	if ( huart == &huart2){
+		if ( xQueueSendFromISR ( tcp_rx_data_queue , ( &uart2_rx_byte ) ,
 				&xHigherPriorityTaskWoken ) == pdPASS ){
 // OK processing
-			set_interface_in(INTERFACE_USB_UART1) ;
+			set_interface_in(INTERFACE_USB_UART2) ;
 		} else{
 // ERROR processing
 		}
-		HAL_UART_Receive_IT ( &huart1 , &uart1_rx_byte , 1 ) ;
+		HAL_UART_Receive_IT ( &huart2 , &uart2_rx_byte , 1 ) ;
 	}
 }
 

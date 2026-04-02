@@ -39,34 +39,16 @@
 #pragma pack(push, 1)
 typedef union alarms_u {
 	struct {
-		uint8_t phase_not_ok : 1;
 		uint8_t emergency : 1;
 		uint8_t keylock : 1;
-		uint8_t interlock_1 : 1;
-		uint8_t interlock_2 : 1;
-		uint8_t stop : 1;
-		uint8_t reserved : 2;
+		uint8_t interlock : 1;
+		uint8_t interlock_chiller : 1;
+		uint8_t reserved2 : 4;
 	} bits;
 	uint8_t val;
 } alarms_t;
 #pragma pack(pop)
 static_assert(sizeof(alarms_t) == 1, "alarms_t must be exactly 1 bytes!");
-
-#pragma pack(push, 1)
-typedef union state_u {
-	struct {
-		uint8_t phase_not_ok : 1;
-		uint8_t emergency : 1;
-		uint8_t keylock : 1;
-		uint8_t interlock_1 : 1;
-		uint8_t interlock_2 : 1;
-		uint8_t stop : 1;
-		uint8_t reserved : 2;
-	} bits;
-	uint8_t val;
-} state_t;
-#pragma pack(pop)
-static_assert(sizeof(state_t) == 1, "state_t must be exactly 1 bytes!");
 
 typedef struct {
 	uint32_t ip [4];
@@ -103,7 +85,6 @@ typedef struct {
 
 	leds_t                  leds;
 	alarms_t                alarms;
-	state_t                 state;
 }
 device_struct;
 

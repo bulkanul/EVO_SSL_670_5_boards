@@ -33,7 +33,7 @@
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
 /* USER CODE BEGIN 0 */
-
+#include "global.h"
 /* USER CODE END 0 */
 
 /* Private define ------------------------------------------------------------*/
@@ -130,7 +130,7 @@ dp83848_IOCtx_t  DP83848_IOCtx = {ETH_PHY_IO_Init,
                                   ETH_PHY_IO_GetTick};
 
 /* USER CODE BEGIN 3 */
-
+extern device_struct mcs_storage;
 /* USER CODE END 3 */
 
 /* Private functions ---------------------------------------------------------*/
@@ -204,7 +204,12 @@ static void low_level_init(struct netif *netif)
   heth.Init.RxBuffLen = 1536;
 
   /* USER CODE BEGIN MACADDRESS */
-
+  MACAddr[0] = mcs_storage.config.mac[0];
+  MACAddr[1] = mcs_storage.config.mac[1];
+  MACAddr[2] = mcs_storage.config.mac[2];
+  MACAddr[3] = mcs_storage.config.mac[3];
+  MACAddr[4] = mcs_storage.config.mac[4];
+  MACAddr[5] = mcs_storage.config.mac[5];
   /* USER CODE END MACADDRESS */
 
   hal_eth_init_status = HAL_ETH_Init(&heth);
@@ -390,12 +395,30 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 
   pbuf_ref(p);
 
-  HAL_ETH_Transmit_IT(&heth, &TxConfig);
-  while (osSemaphoreWait(TxPktSemaphore, TIME_WAITING_FOR_INPUT) != osOK)
+  do
   {
-	;
-  }
-  HAL_ETH_ReleaseTxPacket(&heth);
+    if(HAL_ETH_Transmit_IT(&heth, &TxConfig) == HAL_OK)
+    {
+      errval = ERR_OK;
+    }
+    else
+    {
+
+      if(HAL_ETH_GetError(&heth) & HAL_ETH_ERROR_BUSY)
+      {
+        /* Wait for descriptors to become available */
+        osSemaphoreWait(TxPktSemaphore, ETHIF_TX_TIMEOUT);
+        HAL_ETH_ReleaseTxPacket(&heth);
+        errval = ERR_BUF;
+      }
+      else
+      {
+        /* Other error */
+        pbuf_free(p);
+        errval =  ERR_IF;
+      }
+    }
+  }while(errval == ERR_BUF);
 
   return errval;
 }

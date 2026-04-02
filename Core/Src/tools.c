@@ -123,6 +123,8 @@ void send_response ( int interface_in , char *resp )
 	}
 	else if ( interface_in == INTERFACE_USB_UART1 )
 		HAL_UART_Transmit ( &huart1 , ( uint8_t* ) resp , strlen ( resp ) , 500 ) ;
+	else if ( interface_in == INTERFACE_USB_UART2 )
+		HAL_UART_Transmit ( &huart2 , ( uint8_t* ) resp , strlen ( resp ) , 500 ) ;
 }
 
 void read_last_config_data(config_struct *dest_struct){
@@ -150,32 +152,17 @@ void read_last_config_data(config_struct *dest_struct){
 
 void default_conf ( config_struct *dest_struct )
 {
-	//FIXME add / delete it ?
-	/*
-	for ( int i = 0 ; i < 2 ; i ++ )
-	{
-		( ( config_struct* ) dest_struct )->resistance_thermistor_datasheet [ i ] = 10000 ;
-		( ( config_struct* ) dest_struct )->thermistor_BETA_value [ i ] = 3984 ;
-	}
-	*/
-	//FIXME alarm_thershold ???
-	/*
-	dest_struct->alarm_threshold [ 0 ] = 0;
-	dest_struct->alarm_threshold [ 1 ] = 4095;
-	dest_struct->fan_start_temperature = 30;
-	dest_struct->max_pump_ld_temperature = 40 ;
-	*/
-//FIXME add/delete ?
-/*
-	for ( int i = 0 ; i < DCDC_COUNT ; i ++ )
-		dest_struct->max_curr [ i ] = 1 ;
-*/
-	get_CONF_IP() [ 0 ] = 192 ;
-	get_CONF_IP() [ 1 ] = 168 ;
-	get_CONF_IP() [ 2 ] = 26 ;
-	get_CONF_IP() [ 3 ] = 220 ;
-
-	memcpy ( dest_struct->ip , get_CONF_IP()  , 16 ) ;
+	memset(dest_struct,(unsigned char)0,sizeof(config_struct));
+	dest_struct->ip[0] = 192;
+	dest_struct->ip[1] = 168;
+	dest_struct->ip[2] = 26;
+	dest_struct->ip[3] = 220;
+	dest_struct->mac[0] = 0x00;
+	dest_struct->mac[1] = 0x80;
+	dest_struct->mac[2] = 0xE1;
+	dest_struct->mac[3] = 0x00;
+	dest_struct->mac[4] = 0x00;
+	dest_struct->mac[5] = 0x0B;
 }
 
 
@@ -303,12 +290,10 @@ int get_error(device_struct* mcs){
 
 void alarm_and_state_handler (device_struct *mcs)
 {
-	mcs->alarms.bits.emergency |= 		mcs->state.bits.emergency = 	is_alarm_emergency();
-	mcs->alarms.bits.phase_not_ok |=	mcs->state.bits.phase_not_ok =	is_alarm_phase();
-	mcs->alarms.bits.keylock |= 		mcs->state.bits.keylock = 		is_alarm_keylock();
-	mcs->alarms.bits.interlock_1 |= 	mcs->state.bits.interlock_1 = 	is_alarm_interlock_1();
-	mcs->alarms.bits.interlock_2 |= 	mcs->state.bits.interlock_2 = 	is_alarm_interlock_2();
-	mcs->alarms.bits.stop |= 			mcs->state.bits.stop = 			is_alarm_stop();
+	mcs->alarms.bits.emergency         = 	is_alarm_emergency();
+	mcs->alarms.bits.keylock           =    is_alarm_keylock();
+	mcs->alarms.bits.interlock         = 	is_alarm_interlock();
+	mcs->alarms.bits.interlock_chiller = 	is_alarm_chiller_interlock();
 }
 
 int get_emission(device_struct* mcs){
@@ -343,7 +328,6 @@ void form_cm_header(can_message_struct *cm, int id){
 int protection_err_clr(device_struct *mcs)
 {
 	int err = 0;
-	mcs->alarms.val        = IDLE_STATE;
 	for(int i = 0 ; i < HPLD_1000_COUNT; i ++)
 	{
 		hpld_1000_struct *dev = &mcs->hpld_1000[i];

@@ -111,74 +111,41 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 
 		//-------------REQUEST TO GET LASER STATUS IS USER MODE-----------
 		if (cmd ("lgstatus usr")) {
-			response ("lrstatus usr %i %i %i %i %i %i %i %i\r\n",
-					id, //i
-					mcs->state.bits.interlock_1,//i
-					mcs->state.bits.interlock_2,//i
-					mcs->state.bits.emergency,  //i
-					mcs->state.bits.keylock,	 //i
-					mcs->state.bits.phase_not_ok, //i
-					mcs->state.bits.stop,
+			response ("lrstatus usr %i %i %i %i %i %i\r\n",
+					id,
+					mcs->alarms.bits.keylock,
+					mcs->alarms.bits.interlock,
+					mcs->alarms.bits.emergency,
+					mcs->alarms.bits.interlock_chiller,
 					mcs->alarms.val
 			);
-		} else if (cmd ("lserrclr usr")) {
-
-#if SEED_GEN_COUNT > 0
-			gen_set_flags_reset (&mcs->gen);
-#endif
-#if PREAMP_COUNT > 0
-			for (size_t i = 0; i < PREAMP_COUNT; i++)
-				preamp_set_flags_reset (&mcs->preamp[i]);
-#endif
-#if AMP_COUNT > 0
-			for (size_t i = 0; i < AMP_COUNT; i++)
-				amp_reset_flags (&mcs->amp[i]);
-#endif
-#if DIVIDE_COUNT > 0
-			divide_reset_flags (mcs,resp,debug_buffer,tcp_buffer,i);
-#endif
-
-			if (mcs->alarms.bits.stop)
-				stop_off();
-
+		}
+		else if (cmd ("lserrclr usr")) {
 			mcs->alarms.val = 0;
-
+			protection_err_clr(mcs);
 			response ("lrerrclr usr %i\r\n", id);
-		} else if (cmd ("lsinitall usr")) {
-#if AMP_COUNT > 0
-			for (int i = 0; i < AMP_COUNT; i++){
-				mcs->amp[i].can_err_count = 30;
-				mcs->amp[i].available = 1;
+		}
+		else if (cmd ("lsinitall usr")) {
+#if HPLD_1000_COUNT > 0
+			for (int i = 0; i < HPLD_1000_COUNT; i++){
+				mcs->hpld_1000[i].can_err_count = 30;
+				mcs->hpld_1000[i].available = 1;
 			}
 #endif
 
-#if PREAMP_COUNT > 0
-			for (int i = 0; i < PREAMP_COUNT; i++){
-				mcs->preamp[i].can_err_count = 30;
-				mcs->preamp[i].available = 1;
+#if TEC3_COUNT > 0
+			for (int i = 0; i < TEC3_COUNT; i++){
+				mcs->tec3[i].can_err_count = 30;
+				mcs->tec3[i].available = 1;
 			}
 #endif
-
-#if DIVIDE_COUNT > 0
-			mcs->div[0].can_err_count = 30;
-			mcs->div[0].available = 1;
-#endif
-
-#if SEED_GEN_COUNT > 0
-			mcs->gen.can_err_count = 30;
-			mcs->gen.available = 1;
-#endif
-
 			response ("lrinitall usr %i\r\n", id);
-		} else if (cmd ("lsstop usr")) {
-			rd ("lsstop usr %i %i", &id, &i_val);
-
-			if (i_val != 0 && i_val != 1)
-				err++;
-
-			if (err == 0)
-				(i_val == 1) ? stop_on() : stop_off();
-
+		}
+		else if (cmd ("lspoweronoff usr")) {
+			rd ("lspoweronoff usr %i %i", &id, &i_val);
+			err += (i_val != 0 && i_val != 1);
+			if (!err)
+				(i_val == 1) ? PS_Enable_on_override(mcs) : PS_Enable_on_override(mcs);
 			response ("lrstop usr %i %i\r\n", id, i_val);
 		}
 	}

@@ -64,40 +64,30 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Yellow_Tower_Pin GPIO_PIN_2
-#define Yellow_Tower_GPIO_Port GPIOE
-#define Green_Tower_Pin GPIO_PIN_3
-#define Green_Tower_GPIO_Port GPIOE
-#define Red_Tower_Pin GPIO_PIN_4
-#define Red_Tower_GPIO_Port GPIOE
-#define Relay_Pin GPIO_PIN_2
-#define Relay_GPIO_Port GPIOB
-#define Interlock1_Pin GPIO_PIN_0
-#define Interlock1_GPIO_Port GPIOG
-#define Interlock2_Pin GPIO_PIN_1
-#define Interlock2_GPIO_Port GPIOG
-#define Phase_OK_Pin GPIO_PIN_7
-#define Phase_OK_GPIO_Port GPIOE
+#define LED_ERROR_Pin GPIO_PIN_0
+#define LED_ERROR_GPIO_Port GPIOB
+#define LED_EMISSION_Pin GPIO_PIN_1
+#define LED_EMISSION_GPIO_Port GPIOB
+#define LED_POWER_Pin GPIO_PIN_2
+#define LED_POWER_GPIO_Port GPIOB
 #define EMERGENCY_Pin GPIO_PIN_13
 #define EMERGENCY_GPIO_Port GPIOE
 #define Keylock_Pin GPIO_PIN_14
 #define Keylock_GPIO_Port GPIOE
-#define LED_ERROR_Pin GPIO_PIN_12
-#define LED_ERROR_GPIO_Port GPIOB
-#define LED_EMISSION_Pin GPIO_PIN_13
-#define LED_EMISSION_GPIO_Port GPIOB
-#define LED_POWER_Pin GPIO_PIN_14
-#define LED_POWER_GPIO_Port GPIOB
-#define LED_RED_Pin GPIO_PIN_10
-#define LED_RED_GPIO_Port GPIOD
-#define LED_YELLOW_Pin GPIO_PIN_11
-#define LED_YELLOW_GPIO_Port GPIOD
-#define LED_GREEN_Pin GPIO_PIN_12
-#define LED_GREEN_GPIO_Port GPIOD
-#define STOP_Pin GPIO_PIN_3
-#define STOP_GPIO_Port GPIOG
-#define Protection_ON_OFF_Pin GPIO_PIN_7
-#define Protection_ON_OFF_GPIO_Port GPIOG
+#define LED_RED_Pin GPIO_PIN_7
+#define LED_RED_GPIO_Port GPIOC
+#define LED_YELLOW_Pin GPIO_PIN_8
+#define LED_YELLOW_GPIO_Port GPIOC
+#define LED_GREEN_Pin GPIO_PIN_9
+#define LED_GREEN_GPIO_Port GPIOC
+#define RS485_RSE_Pin GPIO_PIN_12
+#define RS485_RSE_GPIO_Port GPIOC
+#define CHILLER_INTERLOCK_Pin GPIO_PIN_10
+#define CHILLER_INTERLOCK_GPIO_Port GPIOG
+#define PS_ENABLE_Pin GPIO_PIN_11
+#define PS_ENABLE_GPIO_Port GPIOG
+#define INTERLOCK_Pin GPIO_PIN_12
+#define INTERLOCK_GPIO_Port GPIOG
 
 /* USER CODE BEGIN Private defines */
 

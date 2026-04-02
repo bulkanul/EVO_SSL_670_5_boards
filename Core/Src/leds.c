@@ -16,13 +16,6 @@ static void led_emission_off (void) { LED_EMISSION_GPIO_Port->BSRR = (uint32_t)L
 static void led_error_on (void) { LED_ERROR_GPIO_Port->BSRR = (uint32_t)LED_ERROR_Pin; }
 static void led_error_off (void) { LED_ERROR_GPIO_Port->BSRR = (uint32_t)LED_ERROR_Pin << 16U; }
 
-static void led_yellow_tower_on (void) { Yellow_Tower_GPIO_Port->BSRR = (uint32_t)Yellow_Tower_Pin; }
-static void led_yellow_tower_off (void) { Yellow_Tower_GPIO_Port->BSRR = (uint32_t)Yellow_Tower_Pin << 16U; }
-static void led_green_tower_on (void) { Green_Tower_GPIO_Port->BSRR = (uint32_t)Green_Tower_Pin; }
-static void led_green_tower_off (void) { Green_Tower_GPIO_Port->BSRR = (uint32_t)Green_Tower_Pin << 16U; }
-static void led_red_tower_on (void) { Red_Tower_GPIO_Port->BSRR = (uint32_t)Red_Tower_Pin; }
-static void led_red_tower_off (void) { Red_Tower_GPIO_Port->BSRR = (uint32_t)Red_Tower_Pin << 16U; }
-
 void leds_init (leds_t* leds)
 {
     leds->board.red.on = led_red_on;
@@ -38,11 +31,4 @@ void leds_init (leds_t* leds)
     leds->panel.emission.off = led_emission_off;
     leds->panel.error.on = led_error_on;
     leds->panel.error.off = led_error_off;
-
-    leds->tower.red.on = led_red_tower_on;
-    leds->tower.red.off = led_red_tower_off;
-    leds->tower.green.on = led_green_tower_on;
-    leds->tower.green.off = led_green_tower_off;
-    leds->tower.yellow.on = led_yellow_tower_on;
-    leds->tower.yellow.off = led_yellow_tower_off;
 }

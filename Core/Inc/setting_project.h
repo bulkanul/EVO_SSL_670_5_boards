@@ -23,9 +23,10 @@
 #define IDLE_STATE                       0
 #define TRIGGERED_STATE                  1
 
-#define INTERFACE_RS232_UART3            300
-#define INTERFACE_USB_UART1              301
-#define INTERFACE_ETHERNET               302
+#define INTERFACE_RS232_UART3            (300)
+#define INTERFACE_USB_UART1              (301)
+#define INTERFACE_ETHERNET               (302)
+#define INTERFACE_USB_UART2              (303)
 
 #define MCS_CAN_ID                       0x22
 
