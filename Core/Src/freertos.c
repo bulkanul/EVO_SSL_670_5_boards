@@ -59,13 +59,13 @@ device_struct mcs_storage;
 uint8_t uart2_rx_byte;
 
 #if HPLD_1000_COUNT > 0
-	uint8_t hpld_1000_can_id[HPLD_1000_COUNT] = {1};
+	uint8_t hpld_1000_can_id[HPLD_1000_COUNT] = {2};
 #endif
 #if TEC3_COUNT > 0
-	uint8_t tec3_can_id[TEC3_COUNT] = {2,3,4,5};
+	uint8_t tec3_can_id[TEC3_COUNT] = {3,4,5,6};
 #endif
 #if CB_COUNT > 0
-	uint8_t cb_can_id[TEC3_COUNT] = {6};
+	uint8_t cb_can_id[TEC3_COUNT] = {1};
 #endif
 
 /* Definitions for dev_refresh_task */

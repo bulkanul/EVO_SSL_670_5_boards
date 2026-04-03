@@ -60,7 +60,7 @@ typedef struct {
 	float v_ref;
 
 	float tec_temp                    [TEC3_COUNT];
-	float tec_onoff                   [TEC3_COUNT];
+	int   tec_onoff                   [TEC3_COUNT];
 
 	float hpld1000_curr               [HPLD_1000_COUNT];
 }

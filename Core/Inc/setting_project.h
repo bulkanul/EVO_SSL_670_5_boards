@@ -11,12 +11,13 @@
 #define RECV_OK_TIMEOUT                 100000
 
 /* Change this section according to the device -------------------------------*/
-#define PROTOCOL_VERSION                "EVO_SSL_670_5_01042026\r"
+#define PROTOCOL_VERSION                "EVO_SSL_670_5\r"
 /* ---------------------------------------------------------------------------*/
 
 #define HPLD_1000_COUNT 				(1)
 #define TEC3_COUNT 						(4)
 #define CB_COUNT 		          		(1)
+#define ADMN_COUNT 		          		(1)
 
 #define	CAN_IND_REQ                      200
 #define	ETH_IND_REQ                      201
