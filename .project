@@ -31,6 +31,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Core/Src/drivers/EVO-SSL-670-15-Control_433739_065_driver.c</name>
+			<type>1</type>
+			<locationURI>$%7BPROJECT_LOC%7D/board_prj_driver_lib/drivers/EVO-SSL-670-15-Control_433739_065_driver.c</locationURI>
+		</link>
+		<link>
 			<name>Core/Src/drivers/HPLD_1000.c</name>
 			<type>1</type>
 			<locationURI>$%7BPROJECT_LOC%7D/board_prj_driver_lib/drivers/HPLD_1000.c</locationURI>

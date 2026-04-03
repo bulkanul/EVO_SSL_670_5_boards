@@ -145,8 +145,8 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 			rd ("lspoweronoff usr %i %i", &id, &i_val);
 			err += (i_val != 0 && i_val != 1);
 			if (!err)
-				(i_val == 1) ? PS_Enable_on_override(mcs) : PS_Enable_on_override(mcs);
-			response ("lrstop usr %i %i\r\n", id, i_val);
+				(i_val == 1) ? PS_Enable_on_override(mcs) : PS_Enable_off_override(mcs);
+			response ("lrpoweronoff usr %i %i\r\n", id, i_val);
 		}
 	}
 }

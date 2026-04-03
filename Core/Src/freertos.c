@@ -64,6 +64,9 @@ uint8_t uart2_rx_byte;
 #if TEC3_COUNT > 0
 	uint8_t tec3_can_id[TEC3_COUNT] = {2,3,4,5};
 #endif
+#if CB_COUNT > 0
+	uint8_t cb_can_id[TEC3_COUNT] = {6};
+#endif
 
 /* Definitions for dev_refresh_task */
 int dev_refresh_task_state = 0;
@@ -233,6 +236,11 @@ void h_main_task(void const * argument)
 	}
 #endif
 
+#if CB_COUNT > 0
+	for(int i = 0; i < CB_COUNT; i ++)
+		EVO_SSL_670_15_CONTROL_433739_065_init(&mcs->cb[i], &hcan1, cb_can_id[i], &int_can_mess_queue, CanMutexHandle);
+#endif
+
 	osThreadResume(server_taskHandle);
 	osThreadResume(indi_taskHandle);
 	osThreadResume(can_sendHandle);
@@ -359,14 +367,20 @@ void h_tools(void const * argument)
 {
   /* USER CODE BEGIN h_tools */
 	device_struct* mcs = &mcs_storage;
+	int err = 0;
+	mcs->leds.panel.power.on();
   /* Infinite loop */
 	for(;;)
 	{
 		alarm_and_state_handler (mcs);
 
 		mcs->user_mode.output_started = get_emission(mcs);
+		err += get_error(mcs);
 
-		if (mcs->alarms.val != 0) {
+		(mcs->user_mode.output_started == 0)?mcs->leds.panel.emission.off():mcs->leds.panel.emission.on();
+		(err == 0)?mcs->leds.panel.error.off():mcs->leds.panel.error.on();
+
+		if (mcs->alarms.val != 0 && mcs->user_mode.output_started) {
 			user_mode_prepare ();
 			create_usr_offtaskHandle ();
 		}
@@ -388,6 +402,8 @@ void dev_refresh_task_h(const void *argument)
 			refresh_hpld_1000_state(&mcs->hpld_1000[i]);
 		for(int i = 0; i < TEC3_COUNT; i ++)
 			refresh_tec3_state(&mcs->tec3[i]);
+		for(int i = 0; i < CB_COUNT; i ++)
+			refresh_EVO_SSL_670_15_CONTROL_433739_065_state(&mcs->cb[i]);
 		osDelay(10);
 	}
 	dev_refresh_task_state = 0;
