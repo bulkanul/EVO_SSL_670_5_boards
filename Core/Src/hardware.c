@@ -3,13 +3,11 @@
 void PS_Enable_on_override (device_struct *dev)
 {
 	HAL_GPIO_WritePin(PS_ENABLE_GPIO_Port, PS_ENABLE_Pin, GPIO_PIN_SET);
-	dev->leds.panel.power.on();
 }
 
 void PS_Enable_off_override (device_struct *dev)
 {
 	HAL_GPIO_WritePin(PS_ENABLE_GPIO_Port, PS_ENABLE_Pin, GPIO_PIN_RESET);
-	dev->leds.panel.power.off();
 }
 
 bool is_alarm_emergency (void)

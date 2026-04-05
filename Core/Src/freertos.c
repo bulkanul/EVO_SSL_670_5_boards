@@ -367,16 +367,29 @@ void h_tools(void const * argument)
 {
   /* USER CODE BEGIN h_tools */
 	device_struct* mcs = &mcs_storage;
-	int err = 0;
 	mcs->leds.panel.power.on();
   /* Infinite loop */
 	for(;;)
 	{
+		int err = 0;
+		// turn on external green led if needed
+		if(mcs->cb[0].state.green_led[0]!= 1)
+			EVO_SSL_670_15_CONTROL_433739_065_set_led_green(&mcs->cb[0], 0, 1);
+
+		if(mcs->cb[0].state.green_led[1] != mcs->user_mode.PSU_permission)
+			EVO_SSL_670_15_CONTROL_433739_065_set_led_green(&mcs->cb[0], 1, mcs->user_mode.PSU_permission);
+
 		alarm_and_state_handler (mcs);
 
 		mcs->user_mode.output_started = get_emission(mcs);
-		err += get_error(mcs);
+		if(mcs->cb[0].state.orange_led != mcs->user_mode.output_started)
+			EVO_SSL_670_15_CONTROL_433739_065_set_led_orange(&mcs->cb[0], mcs->user_mode.output_started);
 
+		err += get_error(mcs);
+		if(mcs->cb[0].state.red_led != (err!=0))
+			EVO_SSL_670_15_CONTROL_433739_065_set_led_red(&mcs->cb[0], (err!=0));
+
+		// internal leds control
 		(mcs->user_mode.output_started == 0)?mcs->leds.panel.emission.off():mcs->leds.panel.emission.on();
 		(err == 0)?mcs->leds.panel.error.off():mcs->leds.panel.error.on();
 

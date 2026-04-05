@@ -68,9 +68,8 @@ config_struct;
 
 typedef struct
 {
-	float preamp_power_all;
-	float amp_power_all;
-	int output_started;
+	int   PSU_permission;
+	int   output_started;
 }
 user_mode_struct;
 

@@ -111,13 +111,17 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 
 		//-------------REQUEST TO GET LASER STATUS IS USER MODE-----------
 		if (cmd ("lgstatus usr")) {
-			response ("lrstatus usr %i %i %i %i %i %i\r\n",
+			response ("lrstatus usr %i %i %i %i %i\r\n",
 					id,
 					mcs->alarms.bits.keylock,
 					mcs->alarms.bits.interlock,
 					mcs->alarms.bits.emergency,
 					mcs->alarms.bits.interlock_chiller,
-					mcs->alarms.val
+					mcs->hpld_1000[0].state.started_state,
+					mcs->user_mode.PSU_permission,
+					-1,
+					mcs->user_mode.output_started,
+					mcs->cb[0].conf.quantron.mode
 			);
 		}
 		else if (cmd ("lserrclr usr")) {
@@ -141,12 +145,26 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 #endif
 			response ("lrinitall usr %i\r\n", id);
 		}
-		else if (cmd ("lspoweronoff usr")) {
-			rd ("lspoweronoff usr %i %i", &id, &i_val);
+		else if (cmd ("lspsupermission usr")) {
+			rd ("lspsupermission usr %i %i", &id, &i_val);
 			err += (i_val != 0 && i_val != 1);
 			if (!err)
-				(i_val == 1) ? PS_Enable_on_override(mcs) : PS_Enable_off_override(mcs);
-			response ("lrpoweronoff usr %i %i\r\n", id, i_val);
+			{
+				if(i_val == 1)
+					PS_Enable_on_override(mcs);
+				else
+					PS_Enable_off_override(mcs);
+				mcs->user_mode.PSU_permission = i_val;
+			}
+			response ("lrpsupermission usr %i %i\r\n", id, i_val);
+		}
+		//-----------REQUEST TO SET QUANTRON MODE---------
+		else if(cmd("lsmode usr")){
+			rd("lsmode usr %i %i\r\n", &id, &i_val);
+			err += (i_val < 0 || i_val > 1);
+			if(!err)
+			    err += EVO_SSL_670_15_CONTROL_433739_065_set_mode(&mcs->cb[0], i_val);
+			response("lrmode usr %i %i\r\n", id, i_val);
 		}
 	}
 }
