@@ -34,6 +34,7 @@
 #include "../Inc/server.h"
 #include "../Inc/commands_handler.h"
 #include "../Inc/hardware.h"
+#include "../../board_prj_driver_lib/tools/temp_control.h"
 
 /* USER CODE END Includes */
 
@@ -367,6 +368,26 @@ void h_tools(void const * argument)
 {
   /* USER CODE BEGIN h_tools */
 	device_struct* mcs = &mcs_storage;
+	float *temps_to_check[] = {
+		&mcs->tec3[0].state.temp,
+		&mcs->tec3[1].state.temp,
+		&mcs->tec3[2].state.temp,
+		&mcs->tec3[3].state.temp,
+		&mcs->cb[0].state.temp[0],
+		&mcs->cb[0].state.temp[1]
+	};
+	float *temps_max_levels[] = {
+		&mcs->config.max_tec_temp_level[0],
+		&mcs->config.max_tec_temp_level[1],
+		&mcs->config.max_tec_temp_level[2],
+		&mcs->config.max_tec_temp_level[3],
+		&mcs->config.max_cb_temps_level[0],
+		&mcs->config.max_cb_temps_level[1]
+	};
+	const int num_temperatures = sizeof(temps_to_check) / sizeof(float);
+	const int num_levels = sizeof(temps_max_levels) / sizeof(float);
+	const float unused_fan_temp = -1.0;
+
 	mcs->leds.panel.power.on();
   /* Infinite loop */
 	for(;;)
@@ -380,6 +401,7 @@ void h_tools(void const * argument)
 			EVO_SSL_670_15_CONTROL_433739_065_set_led_green(&mcs->cb[0], 1, mcs->user_mode.PSU_permission);
 
 		alarm_and_state_handler (mcs);
+		temp_control(*temps_to_check, num_temperatures, unused_fan_temp, *temps_max_levels, num_levels, &mcs->user_mode.overheat);
 
 		mcs->user_mode.output_started = get_emission(mcs);
 		if(mcs->cb[0].state.orange_led != mcs->user_mode.output_started)

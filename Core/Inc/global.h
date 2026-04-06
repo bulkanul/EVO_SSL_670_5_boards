@@ -44,7 +44,7 @@ typedef union alarms_u {
 		uint8_t keylock : 1;
 		uint8_t interlock : 1;
 		uint8_t interlock_chiller : 1;
-		uint8_t reserved2 : 4;
+		uint8_t reserved2 : 3;
 	} bits;
 	uint8_t val;
 } alarms_t;
@@ -63,12 +63,17 @@ typedef struct {
 	int   tec_onoff                   [TEC3_COUNT];
 
 	float hpld1000_curr               [HPLD_1000_COUNT];
+
+	float max_tec_temp_level          [TEC3_COUNT];
+	float max_cb_temps_level          [2];
 }
 config_struct;
 
 typedef struct
 {
+	int   overheat;
 	int   PSU_permission;
+	int   PSU_state;
 	int   output_started;
 }
 user_mode_struct;
