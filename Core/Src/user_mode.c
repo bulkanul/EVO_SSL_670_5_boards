@@ -119,7 +119,7 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 
 		//-------------REQUEST TO GET LASER STATUS IS USER MODE-----------
 		if (cmd ("lgstatus usr")) {
-			response ("lrstatus usr %i %i %i %i %i %i %i %i %i %i %i\r\n",
+			response ("lrstatus usr %i %i %i %i %i %i %i %i %i %i %i %i\r\n",
 					id,
 					mcs->alarms.bits.keylock,
 					mcs->alarms.bits.interlock,
@@ -130,7 +130,8 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 					mcs->user_mode.PSU_permission,
 					mcs->user_mode.PSU_state,
 					mcs->user_mode.output_started,
-					mcs->cb[0].conf.quantron.mode
+					mcs->cb[0].conf.quantron.mode,
+					mcs->cb[0].state.divider
 			);
 		}
 		else if (cmd ("lsonoff usr")) {
@@ -171,6 +172,14 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 			if(!err)
 			    err += EVO_SSL_670_15_CONTROL_433739_065_set_mode(&mcs->cb[0], i_val);
 			response("lrmode usr %i %i\r\n", id, i_val);
+		}
+		//-----------REQUEST TO SET QUANTRON MODE---------
+		else if(cmd("lsdiv usr")){
+			rd("lsdiv usr %i %i\r\n", &id, &i_val);
+			err += (i_val < 1 || i_val > 254);
+			if(!err)
+			    err += EVO_SSL_670_15_CONTROL_433739_065_set_divider(&mcs->cb[0], i_val);
+			response("lrdiv usr %i %i\r\n", id, i_val);
 		}
 		//-----------REQUEST TO SET QUANTRON MODE---------
 		else if(cmd("lsfreq usr")){
