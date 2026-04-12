@@ -72,6 +72,7 @@ config_struct;
 typedef struct
 {
 	int   overheat;
+	int   tecs_not_ready;
 	int   PSU_permission;
 	int   PSU_state;
 	int   output_started;

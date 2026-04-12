@@ -91,6 +91,7 @@ osMutexId CanMutexHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+void TEC_temperature_check(device_struct* mcs);
 void dev_refresh_task_h(const void *argument);
 /* USER CODE END FunctionPrototypes */
 
@@ -407,6 +408,8 @@ void h_tools(void const * argument)
 		if(mcs->cb[0].state.orange_led != mcs->user_mode.output_started)
 			EVO_SSL_670_15_CONTROL_433739_065_set_led_orange(&mcs->cb[0], mcs->user_mode.output_started);
 
+		TEC_temperature_check(mcs);
+
 		err += get_error(mcs);
 		if(mcs->cb[0].state.red_led != (err!=0))
 			EVO_SSL_670_15_CONTROL_433739_065_set_led_red(&mcs->cb[0], (err!=0));
@@ -425,6 +428,39 @@ void h_tools(void const * argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+
+void TEC_temperature_check(device_struct* mcs)
+{
+#define OK_STATE_TIME 30
+	static uint32_t ok_state_time_for_all = 0;
+	static uint32_t last_ok_state_time_for_all = 0;
+	int ok_state = 1;
+	for(int i = 0; i < TEC3_COUNT; i ++)
+		if(mcs->config.tec_onoff[i] == 1)
+			if(abs_f(mcs->tec3[i].state.temp - mcs->config.tec_temp[i]) > 0.1)
+				ok_state = 0;
+
+	if(ok_state == 0)
+	{
+		ok_state_time_for_all = 0;
+		last_ok_state_time_for_all = 0;
+	}
+	else
+	{
+		uint32_t tick = osKernelSysTick();
+		ok_state_time_for_all += (tick - last_ok_state_time_for_all);
+		last_ok_state_time_for_all = tick;
+	}
+
+	if((float)last_ok_state_time_for_all/1000 > OK_STATE_TIME)
+	{
+		last_ok_state_time_for_all = (OK_STATE_TIME+1)*1000;
+		mcs->user_mode.tecs_not_ready = 0;
+	}
+	else
+		mcs->user_mode.tecs_not_ready = 1;
+}
+
 void dev_refresh_task_h(const void *argument)
 {
 	//	device_struct *mcs = &mcs_storage ;

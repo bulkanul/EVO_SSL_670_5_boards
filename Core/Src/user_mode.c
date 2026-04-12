@@ -56,8 +56,9 @@ void h_usr_ontask(const void *argument )
 #endif
 
 //  FIXME
-//	set_pocels_state(mcs, 1); // turn on pocels cell
-//	set_pocels_voltage(mcs, mcs->config.hv_set_value);
+	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_onoff(&mcs->cb[0], 1);
+	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 0, 1);
+	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 1, 1);
 
 	if (err == 0)
 		while (get_usr_ontask_terminator() == false && mcs->hpld_1000[0].state.flags == 0 && err == 0)
@@ -69,7 +70,9 @@ void h_usr_ontask(const void *argument )
 #endif
 
 //  FIXME
-//	set_pocels_state(mcs, 0); // turn on pocels cell
+	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 0, 0);
+	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 1, 0);
+	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_onoff(&mcs->cb[0], 1);
 
 #if HPLD_1000_COUNT > 0
 	for(uint16_t i = 0; i < HPLD_1000_COUNT; i++)
@@ -137,6 +140,9 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 		else if (cmd ("lsonoff usr")) {
 			rd("lsonoff usr %i %d", &id, &i_val);
 			err += (i_val < 0 || i_val > 1);
+			if(i_val == 1)
+				err += (mcs->user_mode.PSU_permission == 0);
+
 			if(!err)
 			{
 				user_mode_prepare();
