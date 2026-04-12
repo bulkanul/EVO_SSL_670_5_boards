@@ -34,5 +34,8 @@
 
 /* Change this section according to the device -------------------------------*/
 #define DCDC_CURRENT_TOLERANCE           (0.02)
+#define AFTER_START_TEMP_STABILIZE_TIME  (180)          //sec
+#define AFTER_START_DELAY                (10)           //sec
+
 
 #endif //SETTING_PROJECT_H

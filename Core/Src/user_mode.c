@@ -55,6 +55,14 @@ void h_usr_ontask(const void *argument )
 	}
 #endif
 
+	if(!err) osDelay(AFTER_START_DELAY*1000);
+	long start_tecs_check_tick = osKernelSysTick();
+	while(mcs->user_mode.tecs_not_ready && !err) {
+		osDelay(100);
+		if(osKernelSysTick() - start_tecs_check_tick > AFTER_START_TEMP_STABILIZE_TIME*1000)
+			err ++;
+	}
+
 //  FIXME
 	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_onoff(&mcs->cb[0], 1);
 	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 0, 1);
@@ -70,9 +78,9 @@ void h_usr_ontask(const void *argument )
 #endif
 
 //  FIXME
-	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 0, 0);
-	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 1, 0);
-	if(!err) EVO_SSL_670_15_CONTROL_433739_065_set_onoff(&mcs->cb[0], 1);
+	EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 0, 0);
+	EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 1, 0);
+	EVO_SSL_670_15_CONTROL_433739_065_set_onoff(&mcs->cb[0], 0);
 
 #if HPLD_1000_COUNT > 0
 	for(uint16_t i = 0; i < HPLD_1000_COUNT; i++)
@@ -91,6 +99,10 @@ void h_usr_offtask(const void *argument)
 	for(uint16_t i = 0; i < HPLD_1000_COUNT; i++)
 		hpld_1000_set_state_off(&mcs->hpld_1000[i]);
 #endif
+
+	EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 0, 0);
+	EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 1, 0);
+	EVO_SSL_670_15_CONTROL_433739_065_set_onoff(&mcs->cb[0], 0);
 
 	set_usr_offtask_state(false);
 	osThreadTerminate(NULL);

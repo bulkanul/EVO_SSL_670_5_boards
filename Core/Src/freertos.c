@@ -437,13 +437,13 @@ void TEC_temperature_check(device_struct* mcs)
 	int ok_state = 1;
 	for(int i = 0; i < TEC3_COUNT; i ++)
 		if(mcs->config.tec_onoff[i] == 1)
-			if(abs_f(mcs->tec3[i].state.temp - mcs->config.tec_temp[i]) > 0.1)
+			if(abs_f(mcs->tec3[i].state.temp - mcs->config.tec_temp[i]) > 0.2)
 				ok_state = 0;
 
 	if(ok_state == 0)
 	{
 		ok_state_time_for_all = 0;
-		last_ok_state_time_for_all = 0;
+		last_ok_state_time_for_all = osKernelSysTick();
 	}
 	else
 	{
@@ -452,9 +452,9 @@ void TEC_temperature_check(device_struct* mcs)
 		last_ok_state_time_for_all = tick;
 	}
 
-	if((float)last_ok_state_time_for_all/1000 > OK_STATE_TIME)
+	if((float)ok_state_time_for_all/1000 > OK_STATE_TIME)
 	{
-		last_ok_state_time_for_all = (OK_STATE_TIME+1)*1000;
+		ok_state_time_for_all = (OK_STATE_TIME+1)*1000;
 		mcs->user_mode.tecs_not_ready = 0;
 	}
 	else
