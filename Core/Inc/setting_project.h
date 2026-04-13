@@ -36,6 +36,7 @@
 #define DCDC_CURRENT_TOLERANCE           (0.02)
 #define AFTER_START_TEMP_STABILIZE_TIME  (180)          //sec
 #define AFTER_START_DELAY                (10)           //sec
+#define TEMPERATURE_GAP_FOR_LD           (0.2)
 
 
 #endif //SETTING_PROJECT_H

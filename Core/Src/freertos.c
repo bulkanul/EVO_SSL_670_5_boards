@@ -250,6 +250,7 @@ void h_main_task(void const * argument)
 
 	 osThreadDef ( dev_refresh , dev_refresh_task_h, osPriorityNormal, 1, 256);
 	 dev_refresh_taskHandle = osThreadCreate(osThread(dev_refresh), NULL);
+
 	/* Infinite loop */
 	for(;;)
 	{
@@ -418,6 +419,7 @@ void h_tools(void const * argument)
 		(mcs->user_mode.output_started == 0)?mcs->leds.panel.emission.off():mcs->leds.panel.emission.on();
 		(err == 0)?mcs->leds.panel.error.off():mcs->leds.panel.error.on();
 
+		// we're not using mcs->user_mode.ld_tec_not_ready because it is only for user loop
 		if (mcs->alarms.val != 0 && mcs->user_mode.output_started) {
 			user_mode_prepare ();
 			create_usr_offtaskHandle ();
@@ -435,9 +437,9 @@ void TEC_temperature_check(device_struct* mcs)
 	static uint32_t ok_state_time_for_all = 0;
 	static uint32_t last_ok_state_time_for_all = 0;
 	int ok_state = 1;
-	for(int i = 0; i < TEC3_COUNT; i ++)
-		if(mcs->config.tec_onoff[i] == 1)
-			if(abs_f(mcs->tec3[i].state.temp - mcs->config.tec_temp[i]) > 0.2)
+//	for(int i = 0; i < TEC3_COUNT; i ++)
+		if(mcs->config.tec_onoff[2] == 1)
+			if(abs_f(mcs->tec3[2].state.temp - mcs->config.tec_temp[2]) > TEMPERATURE_GAP_FOR_LD)
 				ok_state = 0;
 
 	if(ok_state == 0)
@@ -455,10 +457,10 @@ void TEC_temperature_check(device_struct* mcs)
 	if((float)ok_state_time_for_all/1000 > OK_STATE_TIME)
 	{
 		ok_state_time_for_all = (OK_STATE_TIME+1)*1000;
-		mcs->user_mode.tecs_not_ready = 0;
+		mcs->user_mode.ld_tec_not_ready = 0;
 	}
 	else
-		mcs->user_mode.tecs_not_ready = 1;
+		mcs->user_mode.ld_tec_not_ready = 1;
 }
 
 void dev_refresh_task_h(const void *argument)

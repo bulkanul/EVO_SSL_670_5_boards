@@ -57,7 +57,7 @@ void h_usr_ontask(const void *argument )
 
 	if(!err) osDelay(AFTER_START_DELAY*1000);
 	long start_tecs_check_tick = osKernelSysTick();
-	while(mcs->user_mode.tecs_not_ready && !err) {
+	while(mcs->user_mode.ld_tec_not_ready && !err) {
 		osDelay(100);
 		if(osKernelSysTick() - start_tecs_check_tick > AFTER_START_TEMP_STABILIZE_TIME*1000)
 			err ++;
@@ -134,19 +134,24 @@ void user_command (device_struct *mcs, char* resp, char* debug_buffer, char* tcp
 
 		//-------------REQUEST TO GET LASER STATUS IS USER MODE-----------
 		if (cmd ("lgstatus usr")) {
-			response ("lrstatus usr %i %i %i %i %i %i %i %i %i %i %i %i\r\n",
+			response ("lrstatus usr %i %i %i %i %i %i %i %i %i %i %i %f %f %f %f %f %f\r\n",
 					id,
-					mcs->alarms.bits.keylock,
 					mcs->alarms.bits.interlock,
-					mcs->alarms.bits.emergency,
 					mcs->alarms.bits.interlock_chiller,
 					mcs->user_mode.overheat,
+					mcs->user_mode.ld_tec_not_ready,
 					mcs->hpld_1000[0].state.started_state,
 					mcs->user_mode.PSU_permission,
 					mcs->user_mode.PSU_state,
 					mcs->user_mode.output_started,
 					mcs->cb[0].conf.quantron.mode,
-					mcs->cb[0].state.divider
+					mcs->cb[0].state.divider,
+					mcs->cb[0].state.temp[0],
+					mcs->cb[0].state.temp[1],
+					mcs->tec3[0].state.temp,
+					mcs->tec3[1].state.temp,
+					mcs->tec3[2].state.temp,
+					mcs->tec3[3].state.temp
 			);
 		}
 		else if (cmd ("lsonoff usr")) {

@@ -276,7 +276,7 @@ int get_error(device_struct* mcs){
 	int err = 0;
 	err += alarm->val;
 	err += mcs->user_mode.overheat;
-	err += mcs->user_mode.tecs_not_ready;
+	err += mcs->user_mode.ld_tec_not_ready;
 // TODO need to dicide if this section is needed
 //	for(int i = 0; i < TEC3_COUNT; i ++)
 //	{
