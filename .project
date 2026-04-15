@@ -41,6 +41,11 @@
 			<locationURI>$%7BPROJECT_LOC%7D/board_prj_driver_lib/drivers/HPLD_1000.c</locationURI>
 		</link>
 		<link>
+			<name>Core/Src/drivers/PLD-225A480V-1620-4-U_driver.c</name>
+			<type>1</type>
+			<locationURI>$%7BPROJECT_LOC%7D/board_prj_driver_lib/drivers/PLD-225A480V-1620-4-U_driver.c</locationURI>
+		</link>
+		<link>
 			<name>Core/Src/drivers/TEC_Driver_3_drv.c</name>
 			<type>1</type>
 			<locationURI>$%7BPROJECT_LOC%7D/board_prj_driver_lib/drivers/TEC_Driver_3_drv.c</locationURI>

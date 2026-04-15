@@ -8,6 +8,7 @@
 #define SERVER_PORT                     7878 // NN
 
 #define TCP_QUEUE_BUF_SIZE              1000
+#define RS232_QUEUE_BUF_SIZE            (100)
 #define RECV_OK_TIMEOUT                 100000
 
 /* Change this section according to the device -------------------------------*/

@@ -57,6 +57,7 @@
 /* USER CODE BEGIN Variables */
 device_struct mcs_storage;
 
+uint8_t uart1_rx_byte; // PSU rs232 interface
 uint8_t uart2_rx_byte;
 
 #if HPLD_1000_COUNT > 0
@@ -72,6 +73,7 @@ uint8_t uart2_rx_byte;
 /* Definitions for dev_refresh_task */
 int dev_refresh_task_state = 0;
 osThreadId  dev_refresh_taskHandle;
+osThreadId  oriental_laser_taskHandle;
 
 QueueHandle_t  ind_queueHandle;
 QueueHandle_t int_can_mess_queue;
@@ -80,6 +82,7 @@ QueueHandle_t link_queueHandle;
 QueueHandle_t tcp_rx_data_queue;
 QueueHandle_t  exti_alarm_queueHandle;
 QueueHandle_t  debugger_queueHandle;
+QueueHandle_t rs232_rx_data_queue;
 
 /* USER CODE END Variables */
 osThreadId main_taskHandle;
@@ -155,6 +158,7 @@ void MX_FREERTOS_Init(void) {
 	send_can_mess_queue = xQueueCreate(2, sizeof(can_message_struct_tx));
 	link_queueHandle = xQueueCreate(5, sizeof(uint8_t));
 	tcp_rx_data_queue  = xQueueCreate(TCP_QUEUE_BUF_SIZE, sizeof(char));
+	rs232_rx_data_queue  = xQueueCreate(RS232_QUEUE_BUF_SIZE, sizeof(char));
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -250,6 +254,10 @@ void h_main_task(void const * argument)
 
 	 osThreadDef ( dev_refresh , dev_refresh_task_h, osPriorityNormal, 1, 256);
 	 dev_refresh_taskHandle = osThreadCreate(osThread(dev_refresh), NULL);
+
+
+	 osThreadDef ( oriental_laser_task , vTaskPLD, osPriorityNormal, 1, 256);
+	 oriental_laser_taskHandle = osThreadCreate(osThread(oriental_laser_task), NULL);
 
 	/* Infinite loop */
 	for(;;)
@@ -415,6 +423,21 @@ void h_tools(void const * argument)
 		if(mcs->cb[0].state.red_led != (err!=0))
 			EVO_SSL_670_15_CONTROL_433739_065_set_led_red(&mcs->cb[0], (err!=0));
 
+		if(mcs->psu.mode_state.bits.output)
+		{
+			int psu_err = 0;
+			psu_err += mcs->psu.mode_state.bits.no_flow;
+			psu_err += !mcs->psu.mode_state.bits.no_overcurrent;
+			psu_err += !mcs->psu.mode_state.bits.no_overtemp;
+			psu_err += !mcs->psu.mode_state.bits.no_overvoltage;
+			if(psu_err)
+			{
+				PLD_data_t p = mcs->psu;
+				p.mode_state.val = 0x1A; // External trigger Off
+				PLD_SetParams(&p);
+			}
+		}
+
 		// internal leds control
 		(mcs->user_mode.output_started == 0)?mcs->leds.panel.emission.off():mcs->leds.panel.emission.on();
 		(err == 0)?mcs->leds.panel.error.off():mcs->leds.panel.error.on();
@@ -477,6 +500,9 @@ void dev_refresh_task_h(const void *argument)
 			refresh_tec3_state(&mcs->tec3[i]);
 		for(int i = 0; i < CB_COUNT; i ++)
 			refresh_EVO_SSL_670_15_CONTROL_433739_065_state(&mcs->cb[i]);
+		PLD_data_t p;
+		PLD_GetMeasured(&p);   // читаем текущее
+		mcs->psu = p;
 		osDelay(10);
 	}
 	dev_refresh_task_state = 0;
@@ -495,6 +521,16 @@ void HAL_UART_RxCpltCallback ( UART_HandleTypeDef *huart )
 		}
 		HAL_UART_Receive_IT ( &huart2 , &uart2_rx_byte , 1 ) ;
 	}
+	else if ( huart == &huart1){
+		if ( xQueueSendFromISR ( rs232_rx_data_queue , ( &uart1_rx_byte ) ,
+				&xHigherPriorityTaskWoken ) == pdPASS ){
+// OK processing
+		} else{
+// ERROR processing
+		}
+		HAL_UART_Receive_IT ( &huart1 , &uart1_rx_byte , 1 ) ;
+	}
+
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
