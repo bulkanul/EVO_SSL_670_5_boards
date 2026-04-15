@@ -503,6 +503,7 @@ void dev_refresh_task_h(const void *argument)
 		PLD_data_t p;
 		PLD_GetMeasured(&p);   // читаем текущее
 		mcs->psu = p;
+		mcs->user_mode.PSU_state = mcs->psu.mode_state.bits.output;
 		osDelay(10);
 	}
 	dev_refresh_task_state = 0;
