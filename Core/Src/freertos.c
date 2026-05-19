@@ -259,6 +259,8 @@ void h_main_task(void const * argument)
 	 osThreadDef ( oriental_laser_task , vTaskPLD, osPriorityNormal, 1, 256);
 	 oriental_laser_taskHandle = osThreadCreate(osThread(oriental_laser_task), NULL);
 
+	PLD_SetParams(&mcs->config.psu_params);
+
 	/* Infinite loop */
 	for(;;)
 	{
