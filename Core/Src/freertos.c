@@ -510,7 +510,7 @@ void dev_refresh_task_h(const void *argument)
 			refresh_EVO_SSL_670_15_CONTROL_433739_065_state(&mcs->cb[i]);
 		PLD_data_t p;
 		PLD_GetMeasured(&p);   // читаем текущее
-		mcs->psu = p;
+		memcpy(&mcs->psu,&p,sizeof(PLD_data_t));
 		mcs->user_mode.PSU_state = mcs->psu.mode_state.bits.output;
 		osDelay(10);
 	}
