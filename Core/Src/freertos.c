@@ -419,7 +419,7 @@ void h_tools(void const * argument)
 			EVO_SSL_670_15_CONTROL_433739_065_set_led_green(&mcs->cb[0], 1, mcs->user_mode.PSU_permission);
 
 		alarm_and_state_handler (mcs);
-		temp_control(*temps_to_check, num_temperatures, unused_fan_temp, *temps_max_levels, num_levels, &mcs->user_mode.overheat);
+		temp_control(temps_to_check, num_temperatures, unused_fan_temp, temps_max_levels, num_levels, &mcs->user_mode.overheat);
 
 		mcs->user_mode.output_started = get_emission(mcs);
 		if(mcs->cb[0].state.orange_led != mcs->user_mode.output_started)
