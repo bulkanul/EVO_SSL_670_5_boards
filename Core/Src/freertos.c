@@ -211,6 +211,8 @@ void h_main_task(void const * argument)
 	char resp [1000];
 	long tcp_buffer_ind = 0 ;
 
+	int PLD_initialized = 0;
+
 	for(int try = 0; try < 3;try++){
 		alarm_and_state_handler(mcs);
 #ifndef TB_DEF
@@ -259,8 +261,6 @@ void h_main_task(void const * argument)
 	 osThreadDef ( oriental_laser_task , vTaskPLD, osPriorityNormal, 1, 256);
 	 oriental_laser_taskHandle = osThreadCreate(osThread(oriental_laser_task), NULL);
 
-	PLD_SetParams(&mcs->config.psu_params);
-
 	/* Infinite loop */
 	for(;;)
 	{
@@ -293,6 +293,12 @@ void h_main_task(void const * argument)
 		// clear response buffer to prepare for next cycle begin
 		mcs->current_interface = get_interface_in();
 		// clear response buffer to prepare for next cycle end
+		if(!PLD_initialized)
+			if(PLD_IsConnected())
+			{
+				PLD_SetParams(&mcs->config.psu_params);
+				PLD_initialized = 1;
+			}
 	}
   /* USER CODE END h_main_task */
 }
