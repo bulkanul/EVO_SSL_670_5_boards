@@ -16,6 +16,7 @@
 /* ---------------------------------------------------------------------------*/
 
 #define HPLD_1000_COUNT 				(1)
+#define TEC2_COUNT 						(1)
 #define TEC3_COUNT 						(4)
 #define CB_COUNT 		          		(1)
 #define ADMN_COUNT 		          		(1)

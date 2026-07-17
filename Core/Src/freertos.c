@@ -66,6 +66,9 @@ uint8_t uart2_rx_byte;
 #if TEC3_COUNT > 0
 	uint8_t tec3_can_id[TEC3_COUNT] = {3,4,5,6};
 #endif
+#if TEC2_COUNT > 0
+	uint8_t tec2_can_id[TEC2_COUNT] = {7};
+#endif
 #if CB_COUNT > 0
 	uint8_t cb_can_id[TEC3_COUNT] = {1};
 #endif
@@ -244,6 +247,19 @@ void h_main_task(void const * argument)
 	}
 #endif
 
+#if TEC2_COUNT > 0
+	for(int i = 0; i < TEC2_COUNT; i ++)
+	{
+		tec2_controller_struct *dev = &mcs->tec2[i];
+		tec2_init(dev, &hcan1, tec2_can_id[i], &int_can_mess_queue, CanMutexHandle);
+		if(mcs->config.tec_temp[i] > 10 && mcs->config.tec2_temp[i] < 100)
+		{
+			tec2_set_temperature_0(dev, mcs->config.tec2_temp[i]);
+			tec2_set_start_stop(dev, mcs->config.tec2_onoff[i]);
+		}
+	}
+#endif
+
 #if CB_COUNT > 0
 	for(int i = 0; i < CB_COUNT; i ++)
 		EVO_SSL_670_15_CONTROL_433739_065_init(&mcs->cb[i], &hcan1, cb_can_id[i], &int_can_mess_queue, CanMutexHandle);
@@ -387,6 +403,7 @@ void h_tools(void const * argument)
   /* USER CODE BEGIN h_tools */
 	device_struct* mcs = &mcs_storage;
 	float *temps_to_check[] = {
+		&mcs->tec2[0].state.temp,
 		&mcs->tec3[0].state.temp,
 		&mcs->tec3[1].state.temp,
 		&mcs->tec3[2].state.temp,
@@ -395,6 +412,7 @@ void h_tools(void const * argument)
 		&mcs->cb[0].state.temp[1]
 	};
 	float *temps_max_levels[] = {
+		&mcs->config.max_tec2_temp_level[0],
 		&mcs->config.max_tec_temp_level[0],
 		&mcs->config.max_tec_temp_level[1],
 		&mcs->config.max_tec_temp_level[2],

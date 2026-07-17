@@ -20,8 +20,10 @@ void admin_command(device_struct* mcs, char* resp, char* debug_buffer, char* tcp
 					);
 		}
 		else if (cmd("lsconf admn")) {
-			rd("lsconf admn %i %i %f %i %f %i %f %i %f %f %f %f %f %f %f %f\r\n",
+			rd("lsconf admn %i %i %f %i %f %i %f %i %f %i %f %f %f %f %f %f %f %f %f\r\n",
 				&id,
+				&conf->tec2_onoff[0],
+				&conf->tec2_temp [0],
 				&conf->tec_onoff[0],
 				&conf->tec_temp [0],
 				&conf->tec_onoff[1],
@@ -31,6 +33,7 @@ void admin_command(device_struct* mcs, char* resp, char* debug_buffer, char* tcp
 				&conf->tec_onoff[3],
 				&conf->tec_temp [3],
 				&conf->hpld1000_curr [0],
+				&conf->max_tec2_temp_level[0],
 				&conf->max_tec_temp_level[0],
 				&conf->max_tec_temp_level[1],
 				&conf->max_tec_temp_level[2],
@@ -38,8 +41,10 @@ void admin_command(device_struct* mcs, char* resp, char* debug_buffer, char* tcp
 				&conf->max_cb_temps_level[0],
 				&conf->max_cb_temps_level[1]
 			);
-			response("lrconf admn %i %i %f %i %f %i %f %i %f %f %f %f %f %f %f %f\r\n",
+			response("lrconf admn %i %i %f %i %f %i %f %i %f %i %f %f %f %f %f %f %f %f %f\r\n",
 				id,
+				conf->tec2_onoff[0],
+				conf->tec2_temp [0],
 				conf->tec_onoff[0],
 				conf->tec_temp [0],
 				conf->tec_onoff[1],
@@ -49,6 +54,7 @@ void admin_command(device_struct* mcs, char* resp, char* debug_buffer, char* tcp
 				conf->tec_onoff[3],
 				conf->tec_temp [3],
 				conf->hpld1000_curr [0],
+				conf->max_tec2_temp_level[0],
 				conf->max_tec_temp_level[0],
 				conf->max_tec_temp_level[1],
 				conf->max_tec_temp_level[2],
@@ -59,8 +65,10 @@ void admin_command(device_struct* mcs, char* resp, char* debug_buffer, char* tcp
 		}
 //-----------REQUEST GET CONF ----------------
 		else if (cmd("lgconf admn")) {
-			response("lrconf admn %i %i %f %i %f %i %f %i %f %f %f %f %f %f %f %f\r\n",
+			response("lrconf admn %i %i %f %i %f %i %f %i %f %i %f %f %f %f %f %f %f %f %f\r\n",
 				id,
+				conf->tec2_onoff[0],
+				conf->tec2_temp [0],
 				conf->tec_onoff[0],
 				conf->tec_temp [0],
 				conf->tec_onoff[1],
@@ -70,6 +78,7 @@ void admin_command(device_struct* mcs, char* resp, char* debug_buffer, char* tcp
 				conf->tec_onoff[3],
 				conf->tec_temp [3],
 				conf->hpld1000_curr [0],
+				conf->max_tec2_temp_level[0],
 				conf->max_tec_temp_level[0],
 				conf->max_tec_temp_level[1],
 				conf->max_tec_temp_level[2],
