@@ -44,14 +44,18 @@ get(CONF_IP,int*)
 #define handler_power(...) 
 #endif
 
-int check_type_id(char* data_in,char* type,int max_id){
+int check_type_id(char* data_in,char* _type,int max_id){
 	int id = -1;
 	int err = 0;
 	char* text_type = strstr(data_in," ");
 //// we add space to know that cmd is properly separated
-//	char type[32];
-//	strcpy(type, _type);
-//	type[strlen(type)] = ' ';
+	char type[32];
+	int len = strlen(_type);
+	if(len + 2 >= 32) // leakage check
+		return -1;
+	memcpy(type, _type, len);
+	type[len] = ' ';
+	type[len+1] = '\0';
 ////
 	if(text_type !=0)
 	    err = cmd_compare(++text_type, type) == 0;
