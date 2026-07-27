@@ -524,6 +524,8 @@ void dev_refresh_task_h(const void *argument)
 			refresh_hpld_1000_state(&mcs->hpld_1000[i]);
 		for(int i = 0; i < TEC3_COUNT; i ++)
 			refresh_tec3_state(&mcs->tec3[i]);
+		for(int i = 0; i < TEC2_COUNT; i ++)
+			refresh_tec2_state(&mcs->tec2[i]);
 		for(int i = 0; i < CB_COUNT; i ++)
 			refresh_EVO_SSL_670_15_CONTROL_433739_065_state(&mcs->cb[i]);
 		PLD_data_t p;
