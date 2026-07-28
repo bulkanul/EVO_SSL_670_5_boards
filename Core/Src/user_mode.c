@@ -44,6 +44,13 @@ void h_usr_ontask(const void *argument )
 			err++;
 	}
 
+	// CONFIGURATE PSU
+	mcs->config.psu_params.mode_state.val = 0x1A; //EXT OFF
+	PLD_SetParams(&mcs->config.psu_params);
+	osDelay(3000);
+	mcs->config.psu_params.mode_state.val = 0x15; //EXT ON
+	PLD_SetParams(&mcs->config.psu_params);
+
 #if HPLD_1000_COUNT > 0
 	if(err == 0)
 	{
@@ -77,7 +84,10 @@ void h_usr_ontask(const void *argument )
 		}
 #endif
 
-//  FIXME
+	// CONFIGURATE PSU
+	mcs->config.psu_params.mode_state.val = 0x1A; //EXT OFF
+	PLD_SetParams(&mcs->config.psu_params);
+
 	EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 0, 0);
 	EVO_SSL_670_15_CONTROL_433739_065_set_hv_en(&mcs->cb[0], 1, 0);
 	EVO_SSL_670_15_CONTROL_433739_065_set_onoff(&mcs->cb[0], 0);
@@ -94,7 +104,11 @@ void h_usr_ontask(const void *argument )
 void h_usr_offtask(const void *argument)
 {
 	device_struct *mcs = &mcs_storage ;
-//	set_pocels_state(mcs, 0); // turn on pocels cell
+
+	// CONFIGURATE PSU
+	mcs->config.psu_params.mode_state.val = 0x1A; //EXT OFF
+	PLD_SetParams(&mcs->config.psu_params);
+
 #if HPLD_1000_COUNT > 0
 	for(uint16_t i = 0; i < HPLD_1000_COUNT; i++)
 		hpld_1000_set_state_off(&mcs->hpld_1000[i]);

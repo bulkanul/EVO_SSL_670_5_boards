@@ -312,6 +312,10 @@ void h_main_task(void const * argument)
 		if(!PLD_initialized)
 			if(PLD_IsConnected())
 			{
+				// from now we don't need to start it on startup, just parametrize
+				mcs->config.psu_params.mode_state.val = 0x1A; //EXT OFF
+				PLD_SetParams(&mcs->config.psu_params);
+				osDelay(3000);
 				PLD_SetParams(&mcs->config.psu_params);
 				PLD_initialized = 1;
 			}
